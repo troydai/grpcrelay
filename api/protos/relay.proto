@@ -1,0 +1,16 @@
+syntax = "proto3";
+package grpcrelay;
+
+option go_package = "github.com/troydai/grpcrelay/api/protos";
+
+message ForwardReqeust {
+}
+
+message ForwardResponse {
+    string reply = 1;
+    map<string, string> details = 10;
+}
+
+service Relay {
+    rpc Forward(ForwardReqeust) returns (ForwardResponse) {}
+}
