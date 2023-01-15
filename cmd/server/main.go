@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -24,5 +26,24 @@ func main() {
 		log.Fatal(fmt.Errorf("fail to start TCP listener: %w", err))
 	}
 
-	server.Serve(lis)
+	chServerStopped := make(chan struct{})
+	chSystemSignal := make(chan os.Signal, 1)
+
+	signal.Notify(chSystemSignal)
+
+	go func() {
+		select {
+		case <-chServerStopped:
+		case <-chSystemSignal:
+			server.GracefulStop()
+		}
+	}()
+
+	go func() {
+		defer close(chServerStopped)
+		server.Serve(lis)
+		fmt.Println("Gracefully stopped")
+	}()
+
+	<-chServerStopped
 }
