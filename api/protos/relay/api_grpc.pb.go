@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.11
-// source: api/protos/relay.proto
+// source: api/protos/relay/api.proto
 
-package protos
+package relay
 
 import (
 	context "context"
@@ -101,5 +101,5 @@ var Relay_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/protos/relay.proto",
+	Metadata: "api/protos/relay/api.proto",
 }

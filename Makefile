@@ -1,4 +1,4 @@
-.PHONY: bin tools gen image push integration
+.PHONY: bin tools gen image push integration fmt
 
 bin:
 	@ go build -o artifacts/server cmd/server/main.go 
@@ -11,13 +11,17 @@ tools:
 gen:
 	@ protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    api/protos/relay.proto
+    api/protos/relay/api.proto \
+    api/protos/health/api.proto
 
 image:
 	@ docker build \
 		-t troydai/grpcrelay:latest \
 		-t troydai/grpcrelay:`git describe --tags` \
 		.
+
+fmt:
+	@ go fmt ./...
 
 push: image
 	@ docker push troydai/grpcrelay:`git describe --tags`

@@ -1,24 +1,44 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	api "github.com/troydai/grpcrelay/api/protos"
+	healthapi "github.com/troydai/grpcrelay/api/protos/health"
+	relayapi "github.com/troydai/grpcrelay/api/protos/relay"
+	"github.com/troydai/grpcrelay/internal/health"
 	"github.com/troydai/grpcrelay/internal/relay"
+	"github.com/troydai/grpcrelay/internal/settings"
 )
 
 func main() {
-	server := grpc.NewServer()
-	rs := relay.NewServer()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 
-	api.RegisterRelayServer(server, rs)
+	configLoader, err := settings.NewFileConfigLoader(settings.WithAllowFileMissing())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c, err := configLoader.Load(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := grpc.NewServer()
+	rs := relay.NewServer(c)
+	hs := health.NewServer()
+
+	relayapi.RegisterRelayServer(server, rs)
+	healthapi.RegisterHealthServer(server, hs)
 	reflection.Register(server)
 
 	lis, err := net.Listen("tcp", ":8080")
