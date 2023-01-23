@@ -12,7 +12,8 @@ gen:
 	@ protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
     api/protos/relay/api.proto \
-    api/protos/health/api.proto
+    api/protos/health/api.proto \
+    api/protos/beacon/api.proto \
 
 image:
 	@ docker build \
